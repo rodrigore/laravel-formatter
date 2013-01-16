@@ -14,7 +14,7 @@ php artisan bundle:install formatter
 Or you can clone the bundle straight from github. Run the following command inside your bundles folder:
 
 ```
-git clone git@github.com:dberry37388/laravel-formatter.git formatter
+git clone git@github.com:rodrigore/laravel-formatter.git formatter
 ```
 
 Add the Following to your application/bundles.php file:
@@ -50,7 +50,7 @@ Formatter::make($data_to_convert, 'type of data')->to_the_format_you_want();
 
 ```
 $json_string = '{"foo":"bar","baz":"qux"}';
-print_r(Formater::make($json_string, 'json')->to_array());
+print_r(Formatter::make($json_string, 'json')->to_array());
 
 // Returns
 Array
@@ -59,3 +59,26 @@ Array
     [baz] => qux
 )
 ```
+
+### Handling errors from csv
+
+To check if an error was ocurred when you use the method from_csv, you can use the array call errors.
+
+```
+// Post use of Formatter::make($file, 'csv')
+if ( ! empty(Formatter::$errors) ) {
+    // Show the errors
+    print_r(Formatter::$errors);
+}
+```
+The exception were replaced and added to the array of errors. Also, if the CSV file contains a row with more o less data than the headings this errors are store in this array.
+
+### Spanish Folder
+
+The es Folder was added, with the two messages from the exception and the news errors.
+
+### ToDo
+
+* Check if the replaced of Exception to messages are ok.
+* Add more validation to the csv file.
+* Add more error messages to the other methods.

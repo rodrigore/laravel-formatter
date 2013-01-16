@@ -18,9 +18,8 @@
  */
 namespace Formatter;
 
-use Config, Exception;
+use Config;
 
-class FormatterException extends Exception {}
 
 /**
  * The Formatter Class
@@ -39,6 +38,12 @@ class Formatter
 	 * @var array
 	 */
 	protected $_data = array();
+
+	/**
+	 * Holds the errors. For now only works with from_csv
+	 * @var array
+	 */
+	public static $errors = array();
 
 	/**
 	 * Returns an instance of the Formatter Bundle
@@ -66,7 +71,7 @@ class Formatter
 		// make sure we have data to convert to
 		if (empty($data))
 		{
-			throw new FormatterException(__('formatter::formatter.no_data', array('from_type' => $from_type)));
+			array_push(self::$errors, __('formatter::formatter.no_data', array('from_type' => $from_type)));
 		}
 
 		// make sure our from type has been specified.
@@ -79,7 +84,7 @@ class Formatter
 			}
 			else
 			{
-				throw new FormatterException(__('formatter::formatter.from_type_not_supported', array('from_type' => $from_type)));
+				array_push(self::$errors, __('formatter::formatter.from_type_not_supported', array('from_type' => $from_type)));
 			}
 		}
 
@@ -402,14 +407,28 @@ class Formatter
 		// Get the headings
 		$headings = str_replace($escape.$enclosure, $enclosure, str_getcsv(array_shift($rows), $delimiter, $enclosure, $escape));
 
+		// The current line of the csv
+		$line_number = 1;
+
 		foreach ($rows as $row)
 		{
 			$data_fields = str_replace($escape.$enclosure, $enclosure, str_getcsv($row, $delimiter, $enclosure, $escape));
 
-			if (count($data_fields) == count($headings))
+			if (count($data_fields) > count($headings))
 			{
+
+				array_push(self::$errors, __('formatter::formatter.more_data', array('line_number' => $line_number ) ));
+
+			} else if (count($data_fields) < count($headings)) {
+
+				array_push(self::$errors, __('formatter::formatter.less_data', array('line_number' => $line_number ) ));
+
+			} else {
+
 				$data[] = array_combine($headings, $data_fields);
 			}
+
+			$line_number++;
 
 		}
 
@@ -440,7 +459,7 @@ class Formatter
 	{
 		if ( ! is_array($arr))
 		{
-			throw new FormatterException('The parameter must be an array.');
+			array_push(self::$errors, __('formatter::formatter.must_be_array' ));
 		}
 
 		$counter = 0;
